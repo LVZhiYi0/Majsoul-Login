@@ -4,45 +4,69 @@ from time import sleep
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
+acccounts = int(len(sys.argv[1:])/2)
+print(f'Config {acccounts} accounts')
+for i in range(acccounts):
+    email = sys.argv[1+i]
+    passwd = sys.argv[1+i+acccounts]
+    print('----------------------------')
 
-email, passwd = sys.argv[1:]
-#1.open browser
-options = webdriver.ChromeOptions()
-options.add_argument("--headless=new")
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-driver = webdriver.Chrome(options=options)
-driver.set_window_size(1000, 720)
-driver.get("https://game.maj-soul.net/1/")
-print('Loading...')
-sleep(10)
+    #1.open browser
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--window-size=1280,800")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
 
-#2.input email
-wait = WebDriverWait(driver, 30)
-screen = wait.until(EC.presence_of_element_located((By.ID, 'layaCanvas')))
-ActionChains(driver)\
-    .move_to_element_with_offset(screen, 250, -100)\
-    .click()\
-    .perform()
-driver.find_element(By.NAME, 'input').send_keys(email)
-print('Input email successfully')
+    driver = webdriver.Chrome(options=options)
+    driver.get("https://game.maj-soul.net/1/")
+    print(f'Account {i+1} loading game...')
 
-#3.input password
-ActionChains(driver)\
-    .move_to_element_with_offset(screen, 250, -50)\
-    .click()\
-    .perform()
-driver.find_element(By.NAME, 'input_password').send_keys(passwd)
-print('Input password successfully')
+    try:
+        screen = WebDriverWait(driver, 60).until(
+            EC.presence_of_element_located((By.TAG_NAME, "canvas"))
+        )
+    except:
+        driver.quit()
+        raise
 
-#4.login
-ActionChains(driver)\
-    .move_to_element_with_offset(screen, 250, 50)\
-    .click()\
-    .perform()
-print('Entering game...')
-sleep(20) #loading...
-print('Login success')
-driver.quit()
+    sleep(60)
+
+    #2.input email
+    ActionChains(driver)\
+        .move_to_element_with_offset(screen, 350, -135)\
+        .click()\
+        .perform()
+    sleep(1)
+    ActionChains(driver)\
+        .send_keys(email)\
+        .perform()
+    sleep(1)
+
+    #3.input password
+    ActionChains(driver)\
+        .move_to_element_with_offset(screen, 350, -50)\
+        .click()\
+        .perform()
+    sleep(1)
+    ActionChains(driver)\
+        .send_keys(passwd)\
+        .perform()
+    sleep(1)
+
+    #4.login
+    ActionChains(driver)\
+        .move_to_element_with_offset(screen, 350, 60)\
+        .click()\
+        .perform()
+    print(f'Account {i+1} entering game...')
+    sleep(20)  # loading...
+    print(f'Account {i+1} login completed')
+
+    driver.quit()
