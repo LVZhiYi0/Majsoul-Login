@@ -10,6 +10,9 @@ email, passwd = sys.argv[1:]
 #1.open browser
 options = webdriver.ChromeOptions()
 options.add_argument("--headless=new")
+options.add_argument("--disable-gpu")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=options)
 driver.set_window_size(1000, 720)
 driver.get("https://game.maj-soul.net/1/")
@@ -17,7 +20,8 @@ print('Loading...')
 sleep(10)
 
 #2.input email
-screen = driver.find_element(By.ID, 'layaCanvas')
+wait = WebDriverWait(driver, 30)
+screen = wait.until(EC.presence_of_element_located((By.ID, 'layaCanvas')))
 ActionChains(driver)\
     .move_to_element_with_offset(screen, 250, -100)\
     .click()\
